@@ -1,0 +1,3 @@
+[submodule "doc/aux/tex"]
+	path = doc/aux/tex
+	url = git@github.com:BayesDeLasProvinciasUnidasDelSur/tex.git
