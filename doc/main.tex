@@ -1,0 +1,63 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\input{aux/tex/encabezado.tex}
+
+
+\title{ Variational logistic regression}
+
+\author{Gustavo Landfried}
+\affil{\small Universidad de Buenos Aires. Facultad de Ciencias Exactas y Naturales. Departamento de Computaci\'on. Buenos Aires, Argentina}
+\affil[]{Correspondencia: \url{gustavolandfried@gmail.com}}
+
+\begin{document}
+
+\maketitle
+
+\section{Lower bound de la funci\'on log\'istica}\label{sec:lower_bound}
+
+\todo[inline]{Section 10.5 bishop}
+
+The lower bound of the sigmoid then becomes
+\begin{align}
+ \sigma(x) \geq \sigma(\xi) \exp\left( \frac{x-\xi}{2} - \lambda(\xi)(x^2 - \xi^2) \right)
+\end{align}
+
+donde 
+\begin{align}
+ \lambda(\xi) = -\frac{1}{2\xi} \left( \sigma(\xi) - \frac{1}{2} \right)
+\end{align}
+
+
+
+
+\section{Distribuci\'on variacional a posteriori}
+
+Likelihood
+\begin{align*}
+ p(t|\vm{w}) = \sigma(\vm{w}^T\bm{\phi})^t  (1-\sigma(\vm{w}^T\bm{\phi}))^{1-t}
+\end{align*}
+
+por independecia el joint likelihood
+\begin{align*}
+ p(\vm{t}|\vm{w}) & = \prod_{i=1}^N  p(t|\vm{w}) \\
+ & = \prod_{i=1}^N  \sigma(\vm{w}^T\bm{\phi}_i)^t  (1-\sigma(\vm{w}^T\bm{\phi}_i))^{1-t}
+\end{align*}
+
+Predicci\'on a priori
+\begin{align}
+ p(\vm{t}) & = \int p(\vm{t}|\vm{w})p(\vm{w}) d\vm{w}  \\
+ & = \int \left[ \prod_{i=1}^N p(t_i|\vm{w}) \right] p(\vm{w}) d\vm{w}
+\end{align}
+
+Para obtener el lower bound de $p(\vm{t})$ hacemos uso del resultado de la secci\'on~\ref{sec:lower_bound} que nos permite asegurar
+\begin{align}
+ \sigma(z) \geq \sigma()
+\end{align}
+
+
+
+
+
+
+
+\end{document}
