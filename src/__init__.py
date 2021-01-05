@@ -1,7 +1,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+def y(x,xi):
+    """
+    x = np.arange(-1,2.1,0.1)
+    plt.plot(x,np.exp(-x))
+    plt.plot(x,y(x,0.5))
+    plt.show()
+    
+    xi = np.arange(-1,2.1,0.1)
+    x_0 = 0.5
+    plt.plot(x,y(x_0,xi))
+    plt.show()    
+    """
+    return np.exp(-xi)-np.exp(-xi)*(x-xi)
+
 def sigmoid(z):
+    """
+    x = np.arange(-20,10,0.1)
+    plt.plot(x,np.log(sigmoid(x)))
+    plt.show()
+    """
     return 1/(1+np.exp(-z))
 
 def _lambda(xi):#xi=xis; xi=Phi.dot(w)
@@ -10,6 +29,25 @@ def _lambda(xi):#xi=xis; xi=Phi.dot(w)
     """
     div0 = np.divide(1, (2*xi), out=np.zeros_like(xi), where=xi!=0)
     return (-div0 * (sigmoid(xi)-(1/2)))
+
+def upper_bound(x,xi):
+    """
+    x = np.arange(-5,5,0.1)
+    plt.plot(x,sigmoid(x))
+    plt.plot(x,upper_bound(x,2))
+    plt.plot(x,upper_bound(x,-2))
+    plt.ylim(0,1)
+    plt.show()    
+    """
+    return np.exp(-np.log(1+np.exp(-xi)) + (np.exp(-xi)/(1+np.exp(-xi)))*(x-xi))
+
+def convex_sigmoid():
+    """
+    convex_sigmoid()
+    """
+    x = np.arange(-5,5,0.1)
+    plt.plot(x,sigmoid(x**2))
+    plt.show()
 
 def logistic_lower_bound(z,xi):
     """
@@ -50,8 +88,7 @@ def variational_likelihood(ts,w,Phi):
 def posterior(ts,Phi,mu0=None,S0=None,alpha=1e8):
     N, D = Phi.shape
     mu0 = mu0 if not mu0 is None else np.zeros(D).reshape((D,1)) 
-    S0 = S0 if not S0 is None else  alpha * np.eye(D)   
-  
+    S0 = S0 if not S0 is None else  alpha * np.eye(D)
     """
     TODO:
         xis = EM procedure
@@ -60,7 +97,6 @@ def posterior(ts,Phi,mu0=None,S0=None,alpha=1e8):
         see:
             https://github.com/zhengqigao/PRML-Solution-Manual/blob/master/Solution%20Manual%20For%20PRML.pdf
     """
-
     S0_inv = np.linalg.inv(S0)
     SN_inv = S0_inv + 2*Phi.T.dot(_lambda(xis)*Phi)
     SN = np.linalg.inv(SN_inv)
@@ -77,18 +113,15 @@ El siguiente codigo debe ser migrado a test.py
 """
 El likelihood variacional y el likelihood son exactamente iguales
 """
-np.sum(np.log(likelihood(ts,w,Phi)))
-np.sum(np.log(variational_likelihood(ts,w,Phi)))
-
-
 
 edades_grilla = np.arange(0,100,1).reshape((100,1))
 Phi_grilla = polynomial_basis_function(edades_grilla,np.array(range(2)))
 slope = 0.1
 media = 65
 w1 = slope
-w0 = -slope*media
+w0 = -slope*media*Phi_grilla 
 w = np.array([w0,w1]).reshape((2,1))
+
 plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(w)))
 Phi_xi = np.array([1,85])
 plt.plot(edades_grilla,logistic_lower_bound(Phi_grilla.dot(w),Phi_xi.dot(w)))
@@ -106,6 +139,10 @@ edades =np.random.randint(1,100,N).reshape((N,1))
 Phi = polynomial_basis_function(edades,np.array(range(2)))
 ts = np.random.binomial(1,sigmoid(Phi.dot(w)))
 plt.scatter(edades,ts)
+
+
+np.sum(np.log(likelihood(ts,w,Phi)))
+np.sum(np.log(variational_likelihood(ts,w,Phi)))
 
 
 muN, SN = posterior(ts,Phi)
