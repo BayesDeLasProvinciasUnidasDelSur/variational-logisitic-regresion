@@ -204,21 +204,11 @@ f(x) = e^{-x}
 %
 \en{To do this we make transformations both of the input variable and of the function itself.}
 %
-\en{First we take the log of the logistic function and then decompose it so that}
-%
-\begin{equation}
-\begin{split}
- f(x) = \log \sigma(x) & = - \log(1+e^{-x}) = - \log(e^{-x/2}(e^{x/2}+e^{-x/2})) \\
- & = x/2 - \log(e^{x/2}+e^{-x/2})
-\end{split}
-\end{equation}
-%
-\en{We now note that the function $f(x)$ is a convex function of the variable $x^2$, as can again be verified by finding the second derivative.}
-%
-\en{But we can also be verified by noting that $\sigma(x^2)$ is convex, and also the $\log \sigma(x^2)$ }
+\en{First we note that the function $\sigma(x)$ is a convex function of the variable $x^2$, as can again be verified by finding the second derivative or by insepction.}
 %
 \begin{figure}[H]
 \centering
+\scalebox{.7}{
 \begin{tikzpicture}
   \begin{axis}[
   axis x line=center,
@@ -236,13 +226,25 @@ f(x) = e^{-x}
 \addplot [mark=none,domain=-5:5] {1/(1+e^(-(x^2))};
 \end{axis}
 \end{tikzpicture}
+}
 \caption{}
 \end{figure}
 %
-\en{We compute the derivative of $f(x) = - \log(e^{x/2}+e^{-x/2})$ with respect to x}
+\en{Therefore $\log \sigma(x^2)$ also is convex.}
+%
+\en{If we decompose the log of the logistic function so that, we find a function that is concave,}
+%
+\begin{align}
+ \log \sigma(x) & = - \log(1 + e^{-x}) = - \log(e^{-x/2} (e^{x/2} + e^{-x/2})) \\
+ & = x/2 \underbrace{- \log(e^{x/2} + e^{-x/2})}_{f(x)} = x/2 + f(x)
+\end{align}
+%
+\en{Where $f(x^2)$ is concave.}
+%
+\en{We compute the derivative of $f(x) = - \log(e^{x/2}+e^{-x/2})$}
 %
 \begin{equation}
-\frac{df}{dx} = -\frac{1}{e^{x/2}+e^{-x/2}} \cdot \frac{1}{2} e^{x/2}\cdot -\frac{1}{2} e^{-x/2}
+\frac{df}{dx} = -\frac{1}{e^{x/2}+e^{-x/2}} \cdot \frac{1}{2} e^{x/2} -\frac{1}{2} e^{-x/2} = - \frac{1}{2} \frac{e^{x/2}-e^{-x/2}}{e^{x/2}+e^{-x/2}}
 \end{equation}
 
 

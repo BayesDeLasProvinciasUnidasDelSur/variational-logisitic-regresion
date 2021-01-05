@@ -1,6 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+"""
+TODO:
+    xis = EM procedure
+    - Bayesian parameter estimation via variational methods
+    - Bishop 10.6.2
+    see:
+        https://github.com/zhengqigao/PRML-Solution-Manual/blob/master/Solution%20Manual%20For%20PRML.pdf
+"""
+
+
 def y(x,xi):
     """
     x = np.arange(-1,2.1,0.1)
@@ -23,12 +33,12 @@ def sigmoid(z):
     """
     return 1/(1+np.exp(-z))
 
-def _lambda(xi):#xi=xis; xi=Phi.dot(w)
+def _lambda(xi):#xi=xis; xi=Phi.dot(w); xi = 0
     """
     Cunado xi == 0 quiero que devuelva 0
     """
-    div0 = np.divide(1, (2*xi), out=np.zeros_like(xi), where=xi!=0)
-    return (-div0 * (sigmoid(xi)-(1/2)))
+    div0 = np.divide(1, (2*xi),where=xi!=0)
+    return (div0 * (sigmoid(xi)-(1/2)))
 
 def upper_bound(x,xi):
     """
@@ -41,27 +51,21 @@ def upper_bound(x,xi):
     """
     return np.exp(-np.log(1+np.exp(-xi)) + (np.exp(-xi)/(1+np.exp(-xi)))*(x-xi))
 
-def convex_sigmoid():
+def plot_sigmoid2():
     """
-    convex_sigmoid()
+    plot_sigmoid2()
     """
     x = np.arange(-5,5,0.1)
     plt.plot(x,sigmoid(x**2))
     plt.show()
 
 def logistic_lower_bound(z,xi):
-    """
-    Notar que hay un sumando (+) en vez de un restando (-) en el exponente
-    En alg\'un logar hay un signo invertido (en bishop o ac\'a)
-    """
-    return sigmoid(xi)*np.exp( (z-xi)/2 + _lambda(xi)*(z**2 - xi**2) )
+    return sigmoid(xi)*np.exp( (z-xi)/2 - _lambda(xi)*(z**2 - xi**2) )
 
 def figure_10_12_b():
     """
     Replica la figura 10.12 right de bishop
     Gaussian lower bound for the logistic
-    TODO:
-        [] Agregar par\'ametro bool para imprimir figura
     """
     xs = np.arange(-6,6,0.1)
     plt.plot(xs,sigmoid(xs))
@@ -85,33 +89,40 @@ def variational_likelihood(ts,w,Phi):
     s = logistic_lower_bound(-aes,aes)
     return np.exp(aes*ts)*s
 
-def posterior(ts,Phi,mu0=None,S0=None,alpha=1e8):
+def posterior(ts,Phi,xis,mu0=None,S0=None,alpha=1e8):
     N, D = Phi.shape
     mu0 = mu0 if not mu0 is None else np.zeros(D).reshape((D,1)) 
     S0 = S0 if not S0 is None else  alpha * np.eye(D)
-    """
-    TODO:
-        xis = EM procedure
-        - Bayesian parameter estimation via variational methods
-        - Bishop 10.6.2
-        see:
-            https://github.com/zhengqigao/PRML-Solution-Manual/blob/master/Solution%20Manual%20For%20PRML.pdf
-    """
     S0_inv = np.linalg.inv(S0)
-    SN_inv = S0_inv + 2*Phi.T.dot(_lambda(xis)*Phi)
+    #SN_inv = S0_inv + 2*sum([_lambda(xis[i])*Phi[i,:].reshape((D,1)).dot(Phi[i,:].reshape((1,D))) for i in range(N)] )
+    SN_inv = S0_inv + 2*Phi.T.dot(_lambda(xis)*Phi) # es correcto
     SN = np.linalg.inv(SN_inv)
-    muN = SN.dot(S0_inv.dot(mu0) + (ts - 1/2).T.dot(Phi).T )
+    #SN.dot(S0_inv.dot(mu0) + sum([(ts[i,:]-1/2)*Phi[i,:] for i in range(N)] ).reshape((D,1)))
+    muN = SN.dot(S0_inv.dot(mu0) + (ts - 1/2).T.dot(Phi).T ) # es correcto
     return muN, SN    
 
+def new_xis(muN, SN, Phi):
+    N, D = Phi.shape
+    return np.array([np.sqrt(float(Phi[i,:].reshape((1,D)).dot((SN+muN.dot(muN.T)).dot(Phi[i,].reshape((D,1)))))) for i in range(N) ]).reshape((N,1))
 
+def EM(ts,Phi,xis,mu0=None,S0=None,alpha=1e8):
+    divergence = np.inf
+    i = 0
+    while ((abs(divergence) > 0.1) and (i < 30)): 
+        muN, SN = posterior(ts,Phi,xis,mu0,S0,alpha) 
+        xis_new = new_xis(muN, SN, Phi)
+        delta = float(max(xis - xis_new))
+        xis = xis_new
+        print(delta)
+        divergence = min(delta,divergence)
+        i = i + 1
+    return muN, SN, xis
+
+muN, SN, xis_fin = EM(ts,Phi,xis)
 
 
 """
 El siguiente codigo debe ser migrado a test.py
-"""
-
-"""
-El likelihood variacional y el likelihood son exactamente iguales
 """
 
 edades_grilla = np.arange(0,100,1).reshape((100,1))
@@ -119,16 +130,14 @@ Phi_grilla = polynomial_basis_function(edades_grilla,np.array(range(2)))
 slope = 0.1
 media = 65
 w1 = slope
-w0 = -slope*media*Phi_grilla 
+w0 = -slope*media
 w = np.array([w0,w1]).reshape((2,1))
-
 plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(w)))
 Phi_xi = np.array([1,85])
 plt.plot(edades_grilla,logistic_lower_bound(Phi_grilla.dot(w),Phi_xi.dot(w)))
+plt.show()
 
 z = Phi_grilla.dot(w)
-
-
 
 plt.plot(Phi_grilla.dot(w))
 plt.show()
@@ -136,14 +145,20 @@ plt.close()
 
 N=1000
 edades =np.random.randint(1,100,N).reshape((N,1))
+xis = edades
+xis = np.repeat(0,N).reshape((N,1))
 Phi = polynomial_basis_function(edades,np.array(range(2)))
 ts = np.random.binomial(1,sigmoid(Phi.dot(w)))
 plt.scatter(edades,ts)
-
+plt.show()
 
 np.sum(np.log(likelihood(ts,w,Phi)))
 np.sum(np.log(variational_likelihood(ts,w,Phi)))
 
+xi = np.array([1,2,3])
+
+_lambda()
+*Phi
 
 muN, SN = posterior(ts,Phi)
 plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(muN)))
