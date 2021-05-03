@@ -21,7 +21,21 @@
 
 \maketitle
 
-The dual 
+\section{Introduction}
+
+The minka's technical report about lo maximum-a-posteriori algorithms conclude:
+\begin{quotation}
+The algorithms can be roughly divided into a Hessian-based group (BFGS, FixedH, Newton) and non Hessian-based group (CG, Dual, Coord, IS, MIS).
+In the Hessian-based group, BFGS and FixedH dominate Newton.
+In the non-Hessian-based group, CG and Dual dominate all others.
+If the data has strong correlation, then one should use a Hessian-based algorithm.
+The dimensionality of the data seems to have little impact on the relative performance of the algorithms.
+All algorithms benefit from using Newton-type line searches. 
+\end{quotation}
+
+\vspace{0.3cm}
+
+In this technical report we will review the dual algorithm.
 
 \section{Local Variational Methods}
 

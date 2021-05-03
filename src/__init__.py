@@ -1,16 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-"""
-TODO:
-    xis = EM procedure
-    - Bayesian parameter estimation via variational methods
-    - Bishop 10.6.2
-    see:
-        https://github.com/zhengqigao/PRML-Solution-Manual/blob/master/Solution%20Manual%20For%20PRML.pdf
-"""
-
-
 def y(x,xi):
     """
     x = np.arange(-1,2.1,0.1)
@@ -108,7 +98,7 @@ def new_xis(muN, SN, Phi):
 def EM(ts,Phi,xis,mu0=None,S0=None,alpha=1e8):
     divergence = np.inf
     i = 0
-    while ((abs(divergence) > 0.1) and (i < 30)): 
+    while ((abs(divergence) > 0.01) and (i < 100)): 
         muN, SN = posterior(ts,Phi,xis,mu0,S0,alpha) 
         xis_new = new_xis(muN, SN, Phi)
         delta = float(max(xis - xis_new))
@@ -118,8 +108,6 @@ def EM(ts,Phi,xis,mu0=None,S0=None,alpha=1e8):
         i = i + 1
     return muN, SN, xis
 
-muN, SN, xis_fin = EM(ts,Phi,xis)
-
 
 """
 El siguiente codigo debe ser migrado a test.py
@@ -127,43 +115,21 @@ El siguiente codigo debe ser migrado a test.py
 
 edades_grilla = np.arange(0,100,1).reshape((100,1))
 Phi_grilla = polynomial_basis_function(edades_grilla,np.array(range(2)))
+
+N=330
 slope = 0.1
 media = 65
 w1 = slope
 w0 = -slope*media
 w = np.array([w0,w1]).reshape((2,1))
-plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(w)))
-Phi_xi = np.array([1,85])
-plt.plot(edades_grilla,logistic_lower_bound(Phi_grilla.dot(w),Phi_xi.dot(w)))
-plt.show()
 
-z = Phi_grilla.dot(w)
-
-plt.plot(Phi_grilla.dot(w))
-plt.show()
-plt.close()
-
-N=1000
 edades =np.random.randint(1,100,N).reshape((N,1))
 xis = edades
-xis = np.repeat(0,N).reshape((N,1))
 Phi = polynomial_basis_function(edades,np.array(range(2)))
 ts = np.random.binomial(1,sigmoid(Phi.dot(w)))
+muN, SN, xis_fin = EM(ts,Phi,xis)
+
 plt.scatter(edades,ts)
-plt.show()
-
-np.sum(np.log(likelihood(ts,w,Phi)))
-np.sum(np.log(variational_likelihood(ts,w,Phi)))
-
-xi = np.array([1,2,3])
-
-_lambda()
-*Phi
-
-muN, SN = posterior(ts,Phi)
+plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(w)))
 plt.plot(edades_grilla,sigmoid(Phi_grilla.dot(muN)))
 plt.show()
-
-
-
-
